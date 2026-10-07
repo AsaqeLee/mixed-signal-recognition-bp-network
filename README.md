@@ -1,61 +1,83 @@
-# 多BP神经网络混叠信号识别系统
+# Mixed-Signal Recognition with Multiple BP Networks
 
-本系统使用多个BP神经网络识别不同调制方式（2ASK、BPSK、QPSK、16QAM）的两两混叠信号。针对不同信噪比范围，系统训练了多个专用神经网络，从而提高各种环境下的识别性能。
+MATLAB project for recognizing pairwise mixed modulated signals using multiple backpropagation (BP) neural networks specialized by SNR range.
 
-## 系统架构
+## Overview
 
-系统将不同信噪比范围分为三类：
-- **低信噪比网络**: 处理信噪比<5dB的信号
-- **中信噪比网络**: 处理信噪比5-15dB的信号
-- **高信噪比网络**: 处理信噪比≥15dB的信号
+The system generates or loads mixed signals from common digital modulations, extracts features, trains separate BP networks for low / mid / high SNR regimes, and evaluates recognition performance. Using SNR-specialized networks aims to improve accuracy relative to a single network trained across the full SNR range.
 
-每个神经网络使用以下结构：
-- 输入层: 特征维度
-- 隐藏层1: 64个神经元 (ReLU激活)
-- 隐藏层2: 48个神经元 (ReLU激活)
-- 隐藏层3: 32个神经元 (Tanh激活)
-- 隐藏层4: 16个神经元 (默认激活)
-- 输出层: 8个神经元 (Sigmoid激活)
+## Scope
 
-## 运行方法
+### Modulations (pairwise mixtures)
 
-执行`main.m`文件即可运行整个系统。系统将：
-1. 生成训练和测试数据集
-2. 提取特征
-3. 分别训练多个BP神经网络
-4. 评估模型性能
-5. 可视化结果
+- 2ASK
+- BPSK
+- QPSK
+- 16QAM
 
-## 文件说明
+### SNR coverage
 
-- **main.m**: 主程序，运行整个混叠信号识别系统
-- **split_by_snr.m**: 按信噪比范围拆分数据集
-- **train_multiple_networks.m**: 训练多个BP神经网络
-- **test_multiple_networks.m**: 测试多个BP神经网络的性能
-- **train_bp_network.m**: 训练单个BP神经网络
-- **generate_dataset.m**: 生成混叠信号数据集
-- **extract_features.m**: 提取信号特征
-- **data/**: 存放数据集、模型和结果
+Approximately −5 dB to 20 dB in 5 dB steps (as configured in the generation scripts).
 
-## 数据集
+### Network specialization
 
-系统支持以下调制方式的两两混叠：
-- 2ASK: 二进制幅移键控
-- BPSK: 二进制相移键控
-- QPSK: 四相相移键控
-- 16QAM: 16正交幅度调制
+| Network | SNR range |
+|---------|-----------|
+| Low | SNR < 5 dB |
+| Mid | 5 dB ≤ SNR < 15 dB |
+| High | SNR ≥ 15 dB |
 
-信噪比范围：-5dB到20dB，间隔5dB
+### Typical network topology (per model)
 
-## 改进
+- Input: feature dimension
+- Hidden layers: 64 (ReLU) → 48 (ReLU) → 32 (Tanh) → 16
+- Output: 8 neurons (Sigmoid), corresponding to pairwise mixture classes
 
-与单一神经网络相比，多神经网络系统具有以下优势：
-1. 每个神经网络针对特定信噪比范围优化，提高识别准确率
-2. 低信噪比情况下性能更稳定
-3. 高信噪比情况下准确率更高
-4. 更好的泛化能力
+Exact layer sizes and activations follow the training scripts; adjust them there if you change the feature set.
 
-## 使用技巧
+## Requirements
 
-- 为获得最佳识别效果，应首先确定信号的信噪比范围，然后选择相应的神经网络进行识别
-- 系统自动根据输入信号的信噪比选择最合适的神经网络 
+- MATLAB with Neural Network Toolbox (or Deep Learning Toolbox equivalents used by the scripts)
+- Signal Processing / Communications toolboxes as needed for signal generation
+
+## Getting started
+
+From the repository root in MATLAB:
+
+```matlab
+run('main.m')
+```
+
+`main.m` orchestrates:
+
+1. Dataset generation
+2. Feature extraction
+3. Training of the SNR-specialized BP networks
+4. Evaluation
+5. Result visualization
+
+You may also call the supporting scripts individually after configuring paths and parameters.
+
+## Project layout
+
+```text
+.
+├── main.m
+├── generate_dataset.m
+├── generate_modulated_signal.m
+├── extract_features.m
+├── split_by_snr.m
+├── train_multiple_networks.m
+├── test_multiple_networks.m
+├── data/                 # datasets, models, results
+└── 项目解释.md           # Chinese project notes
+```
+
+## Usage notes
+
+- For best results, estimate the SNR regime of an input and use the corresponding network; the pipeline can select a network automatically when SNR is known.
+- Claims of improved accuracy vs a single network are design goals of this coursework-style project; re-run evaluation on your machine before citing numbers.
+
+## Status / limitations
+
+Academic / experimental MATLAB code. Not packaged as a production recognition service. Feature definitions and class counts are fixed by the scripts; extend them carefully if you add modulations.

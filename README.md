@@ -81,3 +81,7 @@ You may also call the supporting scripts individually after configuring paths an
 ## Status / limitations
 
 Academic / experimental MATLAB code. Not packaged as a production recognition service. Feature definitions and class counts are fixed by the scripts; extend them carefully if you add modulations.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
